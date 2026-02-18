@@ -66,30 +66,29 @@ export default function CompaniesPage() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
-      <header className="border-b bg-card">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <Link href="/dashboard" className="text-muted-foreground hover:text-foreground">
-              ← Retour
-            </Link>
-            <h1 className="text-xl font-bold">Entreprises</h1>
-          </div>
-          <Dialog open={open} onOpenChange={setOpen}>
-            <DialogTrigger asChild>
-              <Button>
-                <Plus className="w-4 h-4 mr-2" />
-                Nouvelle entreprise
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="max-w-lg">
-              <DialogHeader>
-                <DialogTitle>Nouvelle entreprise</DialogTitle>
-                <DialogDescription>
-                  Ajoutez les informations de l'entreprise
-                </DialogDescription>
-              </DialogHeader>
-              <form onSubmit={handleSubmit} className="space-y-4">
+    <div className="p-8">
+      <div className="flex items-center justify-between mb-8">
+        <div>
+          <h1 className="text-2xl font-bold mb-2">Entreprises</h1>
+          <p className="text-muted-foreground">
+            Gérez vos entreprises et leurs employés
+          </p>
+        </div>
+        <Dialog open={open} onOpenChange={setOpen}>
+          <DialogTrigger asChild>
+            <Button>
+              <Plus className="w-4 h-4 mr-2" />
+              Nouvelle entreprise
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle>Nouvelle entreprise</DialogTitle>
+              <DialogDescription>
+                Ajoutez les informations de l'entreprise
+              </DialogDescription>
+            </DialogHeader>
+            <form onSubmit={handleSubmit} className="space-y-4">
                 <div className="space-y-2">
                   <Label htmlFor="name">Nom *</Label>
                   <Input
@@ -172,10 +171,8 @@ export default function CompaniesPage() {
             </DialogContent>
           </Dialog>
         </div>
-      </header>
 
-      <main className="container mx-auto px-4 py-8">
-        {isLoading ? (
+      {isLoading ? (
           <p className="text-muted-foreground">Chargement...</p>
         ) : companies?.length === 0 ? (
           <div className="text-center py-12">
@@ -240,7 +237,6 @@ export default function CompaniesPage() {
             ))}
           </div>
         )}
-      </main>
     </div>
   );
 }

@@ -159,6 +159,75 @@ export function useDeleteEmployee() {
   });
 }
 
+// Sick Leaves
+export function useSickLeaves(employeeId?: string) {
+  return useQuery({
+    queryKey: ["sick-leaves", employeeId],
+    queryFn: async () => {
+      let query = supabase.from("sick_leaves").select("*, employee:employees(*, company:companies(*))");
+      if (employeeId) query = query.eq("employee_id", employeeId);
+      const { data, error } = await query.order("start_date", { ascending: false });
+      if (error) throw error;
+      return data;
+    },
+  });
+}
+
+export function useCreateSickLeave() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (leave: { employee_id: string; start_date: string; end_date: string; reason?: string; certificate_url?: string }) => {
+      const { data, error } = await supabase.from("sick_leaves").insert(leave).select().single();
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["sick-leaves"] });
+    },
+  });
+}
+
+// PDF Templates
+export function usePdfTemplates(companyId?: string) {
+  return useQuery({
+    queryKey: ["pdf-templates", companyId],
+    queryFn: async () => {
+      let query = supabase.from("pdf_templates").select("*, company:companies(*)");
+      if (companyId) query = query.eq("company_id", companyId);
+      const { data, error } = await query.order("name");
+      if (error) throw error;
+      return data;
+    },
+  });
+}
+
+export function useCreatePdfTemplate() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (template: { company_id: string; name: string; content: string; variables_schema?: Record<string, string> }) => {
+      const { data, error } = await supabase.from("pdf_templates").insert(template).select().single();
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["pdf-templates"] });
+    },
+  });
+}
+
+export function useDeletePdfTemplate() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from("pdf_templates").delete().eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["pdf-templates"] });
+    },
+  });
+}
+
 // Leaves
 export function useLeaves(employeeId?: string) {
   return useQuery({
