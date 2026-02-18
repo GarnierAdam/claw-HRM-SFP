@@ -6,7 +6,7 @@ export interface Company {
   address?: string;
   zip_code?: string;
   city?: string;
-  country: string;
+  country?: string;
   phone?: string;
   email?: string;
   created_at: string;
