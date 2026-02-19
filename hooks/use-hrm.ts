@@ -274,3 +274,28 @@ export function useUpdateLeave() {
     },
   });
 }
+
+// File Upload
+export function useUploadFile() {
+  return useMutation({
+    mutationFn: async ({ file, folder }: { file: File; folder?: string }) => {
+      const formData = new FormData();
+      formData.append('file', file);
+      if (folder) {
+        formData.append('folder', folder);
+      }
+
+      const response = await fetch('/api/upload', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Failed to upload file');
+      }
+
+      return response.json() as Promise<{ url: string; filename: string }>;
+    },
+  });
+}
