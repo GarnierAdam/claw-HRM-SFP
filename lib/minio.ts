@@ -1,9 +1,13 @@
 import * as Minio from 'minio';
 
+const useSSL = process.env.MINIO_USE_SSL === 'true';
+const [endpointHost, endpointPort] = (process.env.MINIO_ENDPOINT || 'localhost').split(':');
+const defaultPort = useSSL ? 443 : 80;
+
 const minioClient = new Minio.Client({
-  endPoint: process.env.MINIO_ENDPOINT?.split(':')[0] || 'localhost',
-  port: parseInt(process.env.MINIO_ENDPOINT?.split(':')[1] || '9000'),
-  useSSL: process.env.MINIO_USE_SSL === 'true',
+  endPoint: endpointHost,
+  port: endpointPort ? parseInt(endpointPort) : defaultPort,
+  useSSL,
   accessKey: process.env.MINIO_ACCESS_KEY || 'minioadmin',
   secretKey: process.env.MINIO_SECRET_KEY || 'minioadmin',
 });
