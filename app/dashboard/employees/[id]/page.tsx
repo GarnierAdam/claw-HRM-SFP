@@ -1,113 +1,34 @@
 "use client";
 
 import { useParams } from "next/navigation";
-import { useEmployee, useLeaves, useCreateLeave, useUpdateLeave } from "@/hooks/use-hrm";
+import { useEmployee, useLeaves, useMedicalVisits, useMutuelles, useFormations, useEquipmentHandovers, useContracts } from "@/hooks/use-hrm";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { toast } from "sonner";
-import { User, Briefcase, Mail, Phone, MapPin, Calendar, Plus, Check, X, FileText } from "lucide-react";
+import { User, Briefcase, Mail, Phone, MapPin, Calendar, FileText } from "lucide-react";
 import Link from "next/link";
-import { useState } from "react";
-import { format, differenceInDays } from "date-fns";
+import { format } from "date-fns";
 import { fr } from "date-fns/locale";
-
-const leaveTypes = {
-  paid: "Congés payés",
-  unpaid: "Sans solde",
-  sick: "Maladie",
-  maternity: "Maternité",
-  paternity: "Paternité",
-  other: "Autre",
-};
-
-const leaveStatuses = {
-  pending: { label: "En attente", variant: "secondary" as const },
-  approved: { label: "Approuvé", variant: "default" as const },
-  rejected: { label: "Refusé", variant: "destructive" as const },
-};
+import { LeavesTab } from "@/components/employee/leaves-tab";
+import { CistTab } from "@/components/employee/cist-tab";
+import { MutuellesTab } from "@/components/employee/mutuelles-tab";
+import { FormationsTab } from "@/components/employee/formations-tab";
+import { MaterielTab } from "@/components/employee/materiel-tab";
+import { ContratsTab } from "@/components/employee/contrats-tab";
 
 export default function EmployeeDetailPage() {
   const params = useParams();
   const employeeId = params.id as string;
   const { data: employee, isLoading } = useEmployee(employeeId);
   const { data: leaves } = useLeaves(employeeId);
-  const createLeave = useCreateLeave();
-  const updateLeave = useUpdateLeave();
-  const [open, setOpen] = useState(false);
-  const [leaveForm, setLeaveForm] = useState({
-    type: "paid" as const,
-    start_date: "",
-    end_date: "",
-    reason: "",
-    status: "pending" as const,
-    employee_id: employeeId,
-  });
-
-  const handleLeaveSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    try {
-      await createLeave.mutateAsync(leaveForm);
-      toast.success("Demande de congé créée");
-      setOpen(false);
-      setLeaveForm({
-        type: "paid",
-        start_date: "",
-        end_date: "",
-        reason: "",
-        status: "pending",
-        employee_id: employeeId,
-      });
-    } catch {
-      toast.error("Erreur lors de la création");
-    }
-  };
-
-  const handleApprove = async (id: string) => {
-    try {
-      await updateLeave.mutateAsync({ id, status: "approved" });
-      toast.success("Congé approuvé");
-    } catch {
-      toast.error("Erreur");
-    }
-  };
-
-  const handleReject = async (id: string) => {
-    try {
-      await updateLeave.mutateAsync({ id, status: "rejected" });
-      toast.success("Congé refusé");
-    } catch {
-      toast.error("Erreur");
-    }
-  };
+  const { data: medicalVisits } = useMedicalVisits(employeeId);
+  const { data: mutuelles } = useMutuelles(employeeId);
+  const { data: formations } = useFormations(employeeId);
+  const { data: equipmentHandovers } = useEquipmentHandovers(employeeId);
+  const { data: contracts } = useContracts(employeeId);
 
   if (isLoading) return <p className="p-8">Chargement...</p>;
   if (!employee) return <p className="p-8">Employé non trouvé</p>;
-
-  const totalLeaveDays = leaves?.reduce((acc, leave) => {
-    if (leave.status === "approved") {
-      return acc + differenceInDays(new Date(leave.end_date), new Date(leave.start_date)) + 1;
-    }
-    return acc;
-  }, 0) || 0;
 
   return (
     <div className="min-h-screen bg-background">
@@ -143,11 +64,14 @@ export default function EmployeeDetailPage() {
 
       <main className="container mx-auto px-4 py-8">
         <Tabs defaultValue="info" className="space-y-6">
-          <TabsList>
+          <TabsList className="flex flex-wrap h-auto gap-1">
             <TabsTrigger value="info">Informations</TabsTrigger>
-            <TabsTrigger value="leaves">
-              Congés ({leaves?.length || 0})
-            </TabsTrigger>
+            <TabsTrigger value="leaves">Congés ({leaves?.length || 0})</TabsTrigger>
+            <TabsTrigger value="cist">CIST ({medicalVisits?.length || 0})</TabsTrigger>
+            <TabsTrigger value="mutuelles">Mutuelles ({mutuelles?.length || 0})</TabsTrigger>
+            <TabsTrigger value="formations">Formations ({formations?.length || 0})</TabsTrigger>
+            <TabsTrigger value="materiel">Matériel ({equipmentHandovers?.length || 0})</TabsTrigger>
+            <TabsTrigger value="contrats">Contrats ({contracts?.length || 0})</TabsTrigger>
           </TabsList>
 
           <TabsContent value="info" className="space-y-6">
@@ -198,7 +122,7 @@ export default function EmployeeDetailPage() {
                     </div>
                   )}
                   <div>
-                    <span className="text-muted-foreground">Date d'embauche:</span>{" "}
+                    <span className="text-muted-foreground">Date d&apos;embauche:</span>{" "}
                     {format(new Date(employee.hire_date), "dd MMMM yyyy", { locale: fr })}
                   </div>
                   {employee.contract_type && (
@@ -232,7 +156,7 @@ export default function EmployeeDetailPage() {
                   )}
                   {employee.emergency_contact_name && (
                     <div>
-                      <span className="text-muted-foreground">Contact d'urgence:</span>{" "}
+                      <span className="text-muted-foreground">Contact d&apos;urgence:</span>{" "}
                       {employee.emergency_contact_name} {employee.emergency_contact_phone && `(${employee.emergency_contact_phone})`}
                     </div>
                   )}
@@ -248,115 +172,28 @@ export default function EmployeeDetailPage() {
             )}
           </TabsContent>
 
-          <TabsContent value="leaves" className="space-y-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <h2 className="text-lg font-semibold">Congés et absences</h2>
-                <p className="text-sm text-muted-foreground">
-                  Total jours approuvés: <span className="font-semibold">{totalLeaveDays}</span>
-                </p>
-              </div>
-              <Dialog open={open} onOpenChange={setOpen}>
-                <DialogTrigger asChild>
-                  <Button>
-                    <Plus className="w-4 h-4 mr-2" />
-                    Nouvelle demande
-                  </Button>
-                </DialogTrigger>
-                <DialogContent>
-                  <DialogHeader>
-                    <DialogTitle>Nouvelle demande de congé</DialogTitle>
-                  </DialogHeader>
-                  <form onSubmit={handleLeaveSubmit} className="space-y-4">
-                    <div className="space-y-2">
-                      <Label>Type de congé</Label>
-                      <Select
-                        value={leaveForm.type}
-                        onValueChange={(v) => setLeaveForm({ ...leaveForm, type: v as any })}
-                      >
-                        <SelectTrigger>
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {Object.entries(leaveTypes).map(([k, l]) => (
-                            <SelectItem key={k} value={k}>{l}</SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="space-y-2">
-                        <Label>Du</Label>
-                        <Input
-                          type="date"
-                          value={leaveForm.start_date}
-                          onChange={(e) => setLeaveForm({ ...leaveForm, start_date: e.target.value })}
-                          required
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <Label>Au</Label>
-                        <Input
-                          type="date"
-                          value={leaveForm.end_date}
-                          onChange={(e) => setLeaveForm({ ...leaveForm, end_date: e.target.value })}
-                          required
-                        />
-                      </div>
-                    </div>
-                    <div className="space-y-2">
-                      <Label>Motif</Label>
-                      <Input
-                        value={leaveForm.reason}
-                        onChange={(e) => setLeaveForm({ ...leaveForm, reason: e.target.value })}
-                      />
-                    </div>
-                    <DialogFooter>
-                      <Button type="submit" disabled={createLeave.isPending}>
-                        {createLeave.isPending ? "Création..." : "Créer"}
-                      </Button>
-                    </DialogFooter>
-                  </form>
-                </DialogContent>
-              </Dialog>
-            </div>
+          <TabsContent value="leaves">
+            <LeavesTab employeeId={employeeId} />
+          </TabsContent>
 
-            {leaves?.length === 0 ? (
-              <p className="text-muted-foreground">Aucun congé enregistré</p>
-            ) : (
-              <div className="space-y-3">
-                {leaves?.map((leave) => {
-                  const days = differenceInDays(new Date(leave.end_date), new Date(leave.start_date)) + 1;
-                  return (
-                    <div key={leave.id} className="p-4 bg-card rounded-lg border flex items-center justify-between">
-                      <div>
-                        <div className="flex items-center gap-2">
-                          <span className="font-semibold">{leaveTypes[leave.type]}</span>
-                          <Badge variant={leaveStatuses[leave.status].variant}>
-                            {leaveStatuses[leave.status].label}
-                          </Badge>
-                        </div>
-                        <p className="text-sm text-muted-foreground">
-                          Du {format(new Date(leave.start_date), "dd/MM/yyyy")} au{" "}
-                          {format(new Date(leave.end_date), "dd/MM/yyyy")} ({days} jours)
-                        </p>
-                        {leave.reason && <p className="text-sm mt-1">{leave.reason}</p>}
-                      </div>
-                      {leave.status === "pending" && (
-                        <div className="flex gap-2">
-                          <Button size="sm" variant="outline" onClick={() => handleApprove(leave.id)}>
-                            <Check className="w-4 h-4" />
-                          </Button>
-                          <Button size="sm" variant="outline" onClick={() => handleReject(leave.id)}>
-                            <X className="w-4 h-4 text-destructive" />
-                          </Button>
-                        </div>
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
-            )}
+          <TabsContent value="cist">
+            <CistTab employeeId={employeeId} />
+          </TabsContent>
+
+          <TabsContent value="mutuelles">
+            <MutuellesTab employeeId={employeeId} />
+          </TabsContent>
+
+          <TabsContent value="formations">
+            <FormationsTab employeeId={employeeId} />
+          </TabsContent>
+
+          <TabsContent value="materiel">
+            <MaterielTab employeeId={employeeId} />
+          </TabsContent>
+
+          <TabsContent value="contrats">
+            <ContratsTab employeeId={employeeId} />
           </TabsContent>
         </Tabs>
       </main>

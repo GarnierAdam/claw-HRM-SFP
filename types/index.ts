@@ -95,6 +95,72 @@ export interface GeneratedPdf {
   employee?: Employee;
 }
 
+export interface MedicalVisit {
+  id: string;
+  employee_id: string;
+  date_visite: string;
+  type: "embauche" | "periodique" | "reprise";
+  medecin?: string;
+  resultat?: "apte" | "inapte" | "restrictions";
+  prochaine_visite?: string;
+  notes?: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface Mutuelle {
+  id: string;
+  employee_id: string;
+  organisme: string;
+  formule?: string;
+  date_debut: string;
+  date_fin?: string;
+  niveau_couverture?: string;
+  notes?: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface Formation {
+  id: string;
+  employee_id: string;
+  intitule: string;
+  organisme?: string;
+  date_debut: string;
+  date_fin?: string;
+  statut: "planifiee" | "en_cours" | "terminee";
+  certificat_url?: string;
+  notes?: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface EquipmentHandover {
+  id: string;
+  employee_id: string;
+  designation: string;
+  numero_serie?: string;
+  date_remise: string;
+  date_retour?: string;
+  etat: "neuf" | "bon" | "use" | "endommage";
+  notes?: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface Contract {
+  id: string;
+  employee_id: string;
+  type: "cdi" | "cdd" | "stage" | "freelance" | "autre";
+  date_debut: string;
+  date_fin?: string;
+  salaire?: number;
+  document_url?: string;
+  notes?: string;
+  created_at: string;
+  updated_at: string;
+}
+
 export type LeaveType = Leave["type"];
 export type LeaveStatus = Leave["status"];
 export type EmployeeStatus = Employee["status"];

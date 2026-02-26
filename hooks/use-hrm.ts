@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { createClient } from "@/lib/supabase-client";
-import type { Company, Employee, Leave, SickLeave, PdfTemplate } from "@/types";
+import type { Company, Employee, Leave, SickLeave, PdfTemplate, MedicalVisit, Mutuelle, Formation, EquipmentHandover, Contract } from "@/types";
 
 const supabase = createClient();
 
@@ -271,6 +271,306 @@ export function useUpdateLeave() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["leaves"] });
+    },
+  });
+}
+
+// Medical Visits (CIST)
+export function useMedicalVisits(employeeId?: string) {
+  return useQuery({
+    queryKey: ["medical-visits", employeeId],
+    queryFn: async () => {
+      let query = supabase.from("medical_visits").select("*");
+      if (employeeId) query = query.eq("employee_id", employeeId);
+      const { data, error } = await query.order("date_visite", { ascending: false });
+      if (error) throw error;
+      return data as MedicalVisit[];
+    },
+  });
+}
+
+export function useCreateMedicalVisit() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (visit: Omit<MedicalVisit, "id" | "created_at" | "updated_at">) => {
+      const { data, error } = await supabase.from("medical_visits").insert(visit).select().single();
+      if (error) throw error;
+      return data as MedicalVisit;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["medical-visits"] });
+    },
+  });
+}
+
+export function useUpdateMedicalVisit() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ id, ...data }: Partial<MedicalVisit> & { id: string }) => {
+      const { data: updated, error } = await supabase
+        .from("medical_visits")
+        .update(data)
+        .eq("id", id)
+        .select()
+        .single();
+      if (error) throw error;
+      return updated as MedicalVisit;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["medical-visits"] });
+    },
+  });
+}
+
+export function useDeleteMedicalVisit() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from("medical_visits").delete().eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["medical-visits"] });
+    },
+  });
+}
+
+// Mutuelles
+export function useMutuelles(employeeId?: string) {
+  return useQuery({
+    queryKey: ["mutuelles", employeeId],
+    queryFn: async () => {
+      let query = supabase.from("mutuelles").select("*");
+      if (employeeId) query = query.eq("employee_id", employeeId);
+      const { data, error } = await query.order("date_debut", { ascending: false });
+      if (error) throw error;
+      return data as Mutuelle[];
+    },
+  });
+}
+
+export function useCreateMutuelle() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (mutuelle: Omit<Mutuelle, "id" | "created_at" | "updated_at">) => {
+      const { data, error } = await supabase.from("mutuelles").insert(mutuelle).select().single();
+      if (error) throw error;
+      return data as Mutuelle;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["mutuelles"] });
+    },
+  });
+}
+
+export function useUpdateMutuelle() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ id, ...data }: Partial<Mutuelle> & { id: string }) => {
+      const { data: updated, error } = await supabase
+        .from("mutuelles")
+        .update(data)
+        .eq("id", id)
+        .select()
+        .single();
+      if (error) throw error;
+      return updated as Mutuelle;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["mutuelles"] });
+    },
+  });
+}
+
+export function useDeleteMutuelle() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from("mutuelles").delete().eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["mutuelles"] });
+    },
+  });
+}
+
+// Formations
+export function useFormations(employeeId?: string) {
+  return useQuery({
+    queryKey: ["formations", employeeId],
+    queryFn: async () => {
+      let query = supabase.from("formations").select("*");
+      if (employeeId) query = query.eq("employee_id", employeeId);
+      const { data, error } = await query.order("date_debut", { ascending: false });
+      if (error) throw error;
+      return data as Formation[];
+    },
+  });
+}
+
+export function useCreateFormation() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (formation: Omit<Formation, "id" | "created_at" | "updated_at">) => {
+      const { data, error } = await supabase.from("formations").insert(formation).select().single();
+      if (error) throw error;
+      return data as Formation;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["formations"] });
+    },
+  });
+}
+
+export function useUpdateFormation() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ id, ...data }: Partial<Formation> & { id: string }) => {
+      const { data: updated, error } = await supabase
+        .from("formations")
+        .update(data)
+        .eq("id", id)
+        .select()
+        .single();
+      if (error) throw error;
+      return updated as Formation;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["formations"] });
+    },
+  });
+}
+
+export function useDeleteFormation() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from("formations").delete().eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["formations"] });
+    },
+  });
+}
+
+// Equipment Handovers (Remise Matériel)
+export function useEquipmentHandovers(employeeId?: string) {
+  return useQuery({
+    queryKey: ["equipment-handovers", employeeId],
+    queryFn: async () => {
+      let query = supabase.from("equipment_handovers").select("*");
+      if (employeeId) query = query.eq("employee_id", employeeId);
+      const { data, error } = await query.order("date_remise", { ascending: false });
+      if (error) throw error;
+      return data as EquipmentHandover[];
+    },
+  });
+}
+
+export function useCreateEquipmentHandover() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (handover: Omit<EquipmentHandover, "id" | "created_at" | "updated_at">) => {
+      const { data, error } = await supabase.from("equipment_handovers").insert(handover).select().single();
+      if (error) throw error;
+      return data as EquipmentHandover;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["equipment-handovers"] });
+    },
+  });
+}
+
+export function useUpdateEquipmentHandover() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ id, ...data }: Partial<EquipmentHandover> & { id: string }) => {
+      const { data: updated, error } = await supabase
+        .from("equipment_handovers")
+        .update(data)
+        .eq("id", id)
+        .select()
+        .single();
+      if (error) throw error;
+      return updated as EquipmentHandover;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["equipment-handovers"] });
+    },
+  });
+}
+
+export function useDeleteEquipmentHandover() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from("equipment_handovers").delete().eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["equipment-handovers"] });
+    },
+  });
+}
+
+// Contracts
+export function useContracts(employeeId?: string) {
+  return useQuery({
+    queryKey: ["contracts", employeeId],
+    queryFn: async () => {
+      let query = supabase.from("contracts").select("*");
+      if (employeeId) query = query.eq("employee_id", employeeId);
+      const { data, error } = await query.order("date_debut", { ascending: false });
+      if (error) throw error;
+      return data as Contract[];
+    },
+  });
+}
+
+export function useCreateContract() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (contract: Omit<Contract, "id" | "created_at" | "updated_at">) => {
+      const { data, error } = await supabase.from("contracts").insert(contract).select().single();
+      if (error) throw error;
+      return data as Contract;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["contracts"] });
+    },
+  });
+}
+
+export function useUpdateContract() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ id, ...data }: Partial<Contract> & { id: string }) => {
+      const { data: updated, error } = await supabase
+        .from("contracts")
+        .update(data)
+        .eq("id", id)
+        .select()
+        .single();
+      if (error) throw error;
+      return updated as Contract;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["contracts"] });
+    },
+  });
+}
+
+export function useDeleteContract() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from("contracts").delete().eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["contracts"] });
     },
   });
 }

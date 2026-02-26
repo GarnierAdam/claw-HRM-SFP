@@ -1,9 +1,9 @@
 "use client";
 
-import { useCompanies, useEmployees, useLeaves, useSickLeaves } from "@/hooks/use-hrm";
+import { useCompanies, useEmployees, useLeaves, useSickLeaves, useMedicalVisits, useMutuelles, useFormations, useEquipmentHandovers, useContracts } from "@/hooks/use-hrm";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { Building2, Users, Calendar, HeartPulse, LogOut, FileText } from "lucide-react";
+import { Building2, Users, Calendar, HeartPulse, LogOut, FileText, Shield, Heart, GraduationCap, Package, FileSignature } from "lucide-react";
 import { createClient } from "@/lib/supabase-client";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
@@ -13,6 +13,11 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const { data: employees } = useEmployees();
   const { data: leaves } = useLeaves();
   const { data: sickLeaves } = useSickLeaves();
+  const { data: medicalVisits } = useMedicalVisits();
+  const { data: mutuelles } = useMutuelles();
+  const { data: formations } = useFormations();
+  const { data: equipmentHandovers } = useEquipmentHandovers();
+  const { data: contracts } = useContracts();
   const router = useRouter();
   const supabase = createClient();
 
@@ -73,7 +78,47 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               )}
             </Button>
           </Link>
-          
+
+          <Link href="/dashboard/cist">
+            <Button variant="ghost" className="w-full justify-start">
+              <Shield className="w-4 h-4 mr-3" />
+              CIST
+              {medicalVisits && <span className="ml-auto text-xs bg-muted px-2 py-0.5 rounded">{medicalVisits.length}</span>}
+            </Button>
+          </Link>
+
+          <Link href="/dashboard/mutuelles">
+            <Button variant="ghost" className="w-full justify-start">
+              <Heart className="w-4 h-4 mr-3" />
+              Mutuelles
+              {mutuelles && <span className="ml-auto text-xs bg-muted px-2 py-0.5 rounded">{mutuelles.length}</span>}
+            </Button>
+          </Link>
+
+          <Link href="/dashboard/formations">
+            <Button variant="ghost" className="w-full justify-start">
+              <GraduationCap className="w-4 h-4 mr-3" />
+              Formations
+              {formations && <span className="ml-auto text-xs bg-muted px-2 py-0.5 rounded">{formations.length}</span>}
+            </Button>
+          </Link>
+
+          <Link href="/dashboard/materiel">
+            <Button variant="ghost" className="w-full justify-start">
+              <Package className="w-4 h-4 mr-3" />
+              Matériel
+              {equipmentHandovers && <span className="ml-auto text-xs bg-muted px-2 py-0.5 rounded">{equipmentHandovers.length}</span>}
+            </Button>
+          </Link>
+
+          <Link href="/dashboard/contrats">
+            <Button variant="ghost" className="w-full justify-start">
+              <FileSignature className="w-4 h-4 mr-3" />
+              Contrats
+              {contracts && <span className="ml-auto text-xs bg-muted px-2 py-0.5 rounded">{contracts.length}</span>}
+            </Button>
+          </Link>
+
           <Link href="/dashboard/templates">
             <Button variant="ghost" className="w-full justify-start">
               <FileText className="w-4 h-4 mr-3" />
